@@ -10,6 +10,10 @@
 # Set to $false to keep downloads after installing; helpful for debugging script
 $DeleteDownloads = $true
 
+# Set to $false to use minimal Qt SDK download instead of including Qt Creator
+# Recommend the full install including Qt Creator for development PC
+$IncludeQtCreator = $false
+
 function Test-Administrator
 {
     $user = [Security.Principal.WindowsIdentity]::GetCurrent();
@@ -26,13 +30,24 @@ function Test-Qt-Installed([String] $QtVersion)
 }
 
 function Install-Qt {
-    $QtInstaller = "C:\qt.exe"
-    if (-Not (Test-Path -Path $QtInstaller)) {
-        Write-Host "Downloading Qt online installer..."
-        Invoke-WebRequest https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.4-online.exe -OutFile $QtInstaller
+    if (-Not $IncludeQtCreator) {
+        $QtMinimalInstaller = "c:\QtSDK-5.11.0-msvc2017.7z"
+        if (-Not (Test-Path -Path $QtMinimalInstaller)) {
+                Write-Host "Downloading minimal Qt SDK package..."
+                Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/QtSDK-5.11.0-msvc2017.7z -OutFile $QtMinimalInstaller
+        } else {
+            Write-Host "Using previously downloaded minimal Qt SDK package"
+        }
+        7z x $QtMinimalInstaller -oc:\
+        if ($DeleteDownloads) { Remove-Item $QtMinimalInstaller -Force }
     } else {
-        Write-Host "Using previously downloaded Qt online installer"
-    }
+        $QtInstaller = "C:\qt.exe"
+        if (-Not (Test-Path -Path $QtInstaller)) {
+            Write-Host "Downloading Qt online installer..."
+            Invoke-WebRequest https://download.qt.io/archive/online_installers/3.0/qt-unified-windows-x86-3.0.4-online.exe -OutFile $QtInstaller
+        } else {
+            Write-Host "Using previously downloaded Qt online installer"
+        }
     $QtScript = @"
 
 function Controller() {
@@ -61,10 +76,10 @@ Controller.prototype.TargetDirectoryPageCallback = function()
 
 Controller.prototype.ComponentSelectionPageCallback = function() {
     var widget = gui.currentPageWidget();
-    widget.selectComponent("qt.qt5.5101.win64_msvc2015_64");
-    widget.selectComponent("qt.qt5.5101.qtwebengine");
-    widget.selectComponent("qt.qt5.5101.qtwebengine.win64_msvc2015_64");
-    widget.deselectComponent("qt.qt5.5101.src");
+    widget.selectComponent("qt.qt5.5110.win64_msvc2017_64");
+    widget.selectComponent("qt.qt5.5110.qtwebengine");
+    widget.selectComponent("qt.qt5.5110.qtwebengine.win64_msvc2017_64");
+    widget.deselectComponent("qt.qt5.5110.src");
     gui.clickButton(buttons.NextButton);
 }
 
@@ -90,11 +105,12 @@ Controller.prototype.FinishedPageCallback = function() {
     gui.clickButton(buttons.FinishButton);
 }
 "@
-    $QtScript | Out-File -FilePath C:\qt.qs -Encoding ASCII
-    Write-Host "Starting Qt installation. Be patient, don't click on the buttons!"
-    Start-Process $QtInstaller -Wait -ArgumentList '--script c:\qt.qs'
-    if ($DeleteDownloads) { Remove-Item $QtInstaller -Force }
-    Remove-Item c:\qt.qs -Force
+        $QtScript | Out-File -FilePath C:\qt.qs -Encoding ASCII
+        Write-Host "Starting Qt installation. Be patient, don't click on the buttons!"
+        Start-Process $QtInstaller -Wait -ArgumentList '--script c:\qt.qs'
+        if ($DeleteDownloads) { Remove-Item $QtInstaller -Force }
+        Remove-Item c:\qt.qs -Force
+    }
 }
 
 function Broadcast-SettingChange {
@@ -154,13 +170,7 @@ refreshenv
 # install some deps via chocolatey
 choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=""System""' --fail-on-error-output
 refreshenv
-choco install -y jdk8 ant windows-sdk-10.1 vcbuildtools 7zip git ninja
-
-# fixups for Windows SDK
-mv "C:\Program Files (x86)\Windows Kits\10\bin\x86" "C:\Program Files (x86)\Windows Kits\10\bin\x86_orig"
-mv "C:\Program Files (x86)\Windows Kits\10\bin\x64" "C:\Program Files (x86)\Windows Kits\10\bin\x64_orig"
-cmd /c mklink /J "C:\Program Files (x86)\Windows Kits\10\bin\x86" "C:\Program Files (x86)\Windows Kits\10\bin\10.0.15063.0\x86"
-cmd /c mklink /J "C:\Program Files (x86)\Windows Kits\10\bin\x64" "C:\Program Files (x86)\Windows Kits\10\bin\10.0.15063.0\x64"
+choco install -y jdk8 ant windows-sdk-10.1  7zip git ninja visualstudio2017buildtools visualstudio2017-workload-vctools
 
 # install nsis (version on chocolatey is too new)
 if (-Not (Test-Path -Path "C:\Program Files (x86)\NSIS")) {
@@ -183,18 +193,18 @@ Remove-Item -Force 'C:\ProgramData\chocolatey\bin\cpack.exe'
 
 # install Qt and Qt Creator
 $QtInstallTries = 5
-if (Test-Qt-Installed("5.10.1")) {
+if (Test-Qt-Installed("5.1l.0")) {
     Write-Host "Qt already installed, skipping"
 } else {
     # Qt online installer has a high failure rate, so try several times
     for ($i = 0; $i -le $QtInstallTries; $i++) {
         Install-Qt
-        if (Test-Qt-Installed("5.10.1")) {break}
+        if (Test-Qt-Installed("5.11.0")) {break}
     }        
 }
 
 # Qt installation doesn't always work (maybe a timeout?)
-if (-Not (Test-Qt-Installed("5.10.1"))) {
+if (-Not (Test-Qt-Installed("5.11.0"))) {
     Write-Host "Qt not installed; either install yourself or re-run this script to try again" -ForegroundColor Red
 } else {
 
