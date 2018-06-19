@@ -31,10 +31,10 @@ function Test-Qt-Installed([String] $QtVersion)
 
 function Install-Qt {
     if (-Not $IncludeQtCreator) {
-        $QtMinimalInstaller = "c:\QtSDK-5.11.0-msvc2017.7z"
+        $QtMinimalInstaller = "c:\QtSDK-5.11.1-msvc2017.7z"
         if (-Not (Test-Path -Path $QtMinimalInstaller)) {
                 Write-Host "Downloading minimal Qt SDK package..."
-                Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/QtSDK-5.11.0-msvc2017.7z -OutFile $QtMinimalInstaller
+                Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/QtSDK-5.11.1-msvc2017.7z -OutFile $QtMinimalInstaller
         } else {
             Write-Host "Using previously downloaded minimal Qt SDK package"
         }
@@ -76,10 +76,10 @@ Controller.prototype.TargetDirectoryPageCallback = function()
 
 Controller.prototype.ComponentSelectionPageCallback = function() {
     var widget = gui.currentPageWidget();
-    widget.selectComponent("qt.qt5.5110.win64_msvc2017_64");
-    widget.selectComponent("qt.qt5.5110.qtwebengine");
-    widget.selectComponent("qt.qt5.5110.qtwebengine.win64_msvc2017_64");
-    widget.deselectComponent("qt.qt5.5110.src");
+    widget.selectComponent("qt.qt5.5111.win64_msvc2017_64");
+    widget.selectComponent("qt.qt5.5111.qtwebengine");
+    widget.selectComponent("qt.qt5.5111.qtwebengine.win64_msvc2017_64");
+    widget.deselectComponent("qt.qt5.5111.src");
     gui.clickButton(buttons.NextButton);
 }
 
@@ -193,18 +193,18 @@ Remove-Item -Force 'C:\ProgramData\chocolatey\bin\cpack.exe'
 
 # install Qt and Qt Creator
 $QtInstallTries = 5
-if (Test-Qt-Installed("5.1l.0")) {
+if (Test-Qt-Installed("5.1l.1")) {
     Write-Host "Qt already installed, skipping"
 } else {
     # Qt online installer has a high failure rate, so try several times
     for ($i = 0; $i -le $QtInstallTries; $i++) {
         Install-Qt
-        if (Test-Qt-Installed("5.11.0")) {break}
+        if (Test-Qt-Installed("5.11.1")) {break}
     }        
 }
 
 # Qt installation doesn't always work (maybe a timeout?)
-if (-Not (Test-Qt-Installed("5.11.0"))) {
+if (-Not (Test-Qt-Installed("5.11.1"))) {
     Write-Host "Qt not installed; either install yourself or re-run this script to try again" -ForegroundColor Red
 } else {
 
