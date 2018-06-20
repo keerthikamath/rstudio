@@ -13,7 +13,7 @@ RUN choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=""System""' --fail-o
   
 # install Visual C++ via chocolatey
 # The workload step is failing in Docker so we're installing it via Visual Studio installer 
-# later in the file; be nice to revisit this and see if it can be made to work.
+# later in this file. Leaving here as a reminded to try chocolatey again in the future.
 # RUN choco install -y visualstudio2017buildtools
 # RUN choco install -y visualstudio2017-workload-vctools
 
@@ -47,9 +47,13 @@ RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/vs_buildtools_
   Remove-Item C:\vs_buildtools_2017.exe
 
 # install qt (note that we are using the current directory's context)
-RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/QtSDK-5.11.1-msvc2017.7z -OutFile c:\QtSDK-5.11.1-msvc2017.7z ;\
-  7z x c:\QtSDK-5.11.1-msvc2017.7z -oc:\ ;\
-  Remove-Item c:\QtSDK-5.11.1-msvc2017.7z -Force
+COPY windows/qt-noninteractive-install-win.qs c:\qt-noninteractive-install-win.qs
+RUN $ErrorActionPreference = 'Stop'; \
+   $ProgressPreference = 'SilentlyContinue' ;\
+   Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/qt-unified-windows-x86-3.0.4-online.exe -OutFile c:\qt.exe ;\
+   Start-Process c:\qt.exe -Wait -ArgumentList '--script c:\qt-noninteractive-install-win.qs' ;\
+   Remove-Item c:\qt.exe -Force ;\
+   Remove-Item c:\qt-noninteractive-install-win.qs
 
 # cpack (an alias from chocolatey) and cmake's cpack conflict.
 RUN Remove-Item -Force 'C:\ProgramData\chocolatey\bin\cpack.exe'
