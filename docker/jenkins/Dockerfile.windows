@@ -9,9 +9,13 @@ RUN iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.or
 # install some deps via chocolatey
 RUN choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=""System""' --fail-on-error-output;\
   choco install -y jdk8 ant windows-sdk-10.1 ;\
-  choco install -y 7zip ;\
-  choco install -y visualstudio2017buildtools ;\
-  choco install -y visualstudio2017-workload-vctools
+  choco install -y 7zip
+  
+# install Visual C++ via chocolatey
+# The workload step is failing in Docker so we're installing it via Visual Studio installer 
+# later in the file; be nice to revisit this and see if it can be made to work.
+# RUN choco install -y visualstudio2017buildtools
+# RUN choco install -y visualstudio2017-workload-vctools
 
 # install aws cli
 # awscli bug where cp65001 is not understood by internal python.
@@ -36,6 +40,11 @@ RUN $env:path += ';C:\R\R-3.0.3\bin\i386\' ;\
 RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/test-qt-windows/nsis-2.50-setup.exe -OutFile C:\nsis-2.50-setup.exe ;\
   Start-Process c:\nsis-2.50-setup.exe -Wait -ArgumentList '/S' ;\
   Remove-Item c:\nsis-2.50-setup.exe
+
+# install visual c++
+RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/vs_buildtools_2017.exe -OutFile C:\vs_buildtools_2017.exe ;\
+  Start-Process C:\vs_buildtools_2017.exe -Wait -ArgumentList '--quiet --add Microsoft.VisualStudio.Workload.VCTools' ;\
+  Remove-Item C:\vs_buildtools_2017.exe
 
 # install qt (note that we are using the current directory's context)
 RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/QtSDK-5.11.1-msvc2017.7z -OutFile c:\QtSDK-5.11.1-msvc2017.7z ;\
