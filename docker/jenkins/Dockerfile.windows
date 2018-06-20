@@ -47,7 +47,7 @@ RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/vs_buildtools_
   Remove-Item C:\vs_buildtools_2017.exe
 
 # install qt (note that we are using the current directory's context)
-COPY windows/qt-noninteractive-install-win.qs c:\qt-noninteractive-install-win.qs
+COPY docker/jenkins/windows/qt-noninteractive-install-win.qs c:\qt-noninteractive-install-win.qs
 RUN $ErrorActionPreference = 'Stop'; \
    $ProgressPreference = 'SilentlyContinue' ;\
    Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/qt-unified-windows-x86-3.0.4-online.exe -OutFile c:\qt.exe ;\
