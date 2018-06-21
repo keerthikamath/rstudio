@@ -42,7 +42,7 @@ mkdir -p "$PKG_DIR"
 
 # move to the repo root (script's grandparent directory)
 cd "$(dirname ${BASH_SOURCE[0]})/.."
-REPO=$(basename "$(pwd)")
+REPO=$(basename $(pwd))
 
 # print usage if no argument supplied
 if [ -z "$IMAGE" ] || [ -z "$FLAVOR" ]; then
@@ -80,8 +80,8 @@ elif [ "${IMAGE:0:8}" = "opensuse" ]; then
     PACKAGE=RPM
     INSTALLER=zypper
 elif [ "${IMAGE:0:7}" = "windows" ]; then
-    PACKAGE=WINDOWS
-    INSTALLER=WINDOWS
+    echo -e "Use docker-compile.cmd in a Windows Command Prompt to build for Windows."
+    exit 1
 else
     PACKAGE=DEB
     INSTALLER=debian
@@ -107,16 +107,12 @@ ENV="$ENV GIT_COMMIT=$(git rev-parse HEAD)"
 ENV="$ENV BUILD_ID=local"
 
 # if we have an nproc command, use it to infer make parallelism
-if [ "${PACKAGE:0:7}" != "WINDOWS" ]; then
-    ENV="$ENV MAKEFLAGS=j1"
-else
-    if hash nproc 2>/dev/null; then
-        # linux
-        ENV="$ENV MAKEFLAGS=-j$(nproc --all)"
-    elif hash sysctl 2>/dev/null; then
-        # macos
-        ENV="$ENV MAKEFLAKGS=-j$(sysctl -n hw.ncpu)"
-    fi
+if hash nproc 2>/dev/null; then
+    # linux
+    ENV="$ENV MAKEFLAGS=-j$(nproc --all)"
+elif hash sysctl 2>/dev/null; then
+    # macos
+    ENV="$ENV MAKEFLAKGS=-j$(sysctl -n hw.ncpu)"
 fi
 
 # remove previous image if it exists
@@ -125,11 +121,7 @@ echo "Cleaning up container $CONTAINER_ID if it exists..."
 docker rm "$CONTAINER_ID" || true
 
 # run compile step
-if [ "${PACKAGE:0:7}" = "WINDOWS" ]; then
-    docker run --name "$CONTAINER_ID" -v "$(pwd):/src" "$REPO:$IMAGE" cmd /c "md c:\\package && cd c:\\package && $ENV C:\\src\\package\\win32\\make-package && echo built windows package"
-else
-    docker run --name "$CONTAINER_ID" -v "$(pwd):/src" "$REPO:$IMAGE" bash -c "mkdir /package && cd /package && $ENV /src/package/linux/make-package ${FLAVOR^} $PACKAGE clean $VARIANT && echo build-${FLAVOR^}-$PACKAGE/*.${PACKAGE,,} && ls build-${FLAVOR^}-$PACKAGE/*.${PACKAGE,,}"
-fi
+docker run --name "$CONTAINER_ID" -v "$(pwd):/src" "$REPO:$IMAGE" bash -c "mkdir /package && cd /package && $ENV /src/package/linux/make-package ${FLAVOR^} $PACKAGE clean $VARIANT && echo build-${FLAVOR^}-$PACKAGE/*.${PACKAGE,,} && ls build-${FLAVOR^}-$PACKAGE/*.${PACKAGE,,}"
 
 # extract logs to get filename (should be on the last line)
 PKG_FILENAME=$(docker logs --tail 1 "$CONTAINER_ID")
