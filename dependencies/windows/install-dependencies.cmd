@@ -29,7 +29,7 @@ set LIBCLANG_NAME=libclang-windows-%LIBCLANG_VERSION%
 set LIBCLANG_FILE=%LIBCLANG_NAME%.zip
 
 set QT_VERSION=5.11.1
-set QT_FILE=QtSDK-%QT_VERSION%-msvc2017.7z
+set QT_FILE=qt-unified-windows-x86-3.0.4-online.exe
 
 if not exist gnudiff (
   wget %WGET_ARGS% "%BASEURL%%GNUDIFF_FILE%"
@@ -92,18 +92,6 @@ if not exist %BOOST_FILES:~0,-4%* (
   del %BOOST_FILES%
 )
 
-if not exist C:\Qt%QT_VERSION% (
-  if not exist C:\Qt\Qt%QT_VERSION% (
-    if not exist C:\Qt\%QT_VERSION% (
-      wget %WGET_ARGS% %BASEURL%%QT_FILE%
-      echo Extracting %QT_FILE%
-      7z x %QT_FILE%
-      del %QT_FILE%
-      move Qt%QT_VERSION% C:\Qt%QT_VERSION%
-    )
-  )
-)
-
 if not exist ..\..\src\gwt\lib (
   mkdir ..\..\src\gwt\lib
 )
@@ -129,7 +117,6 @@ if not exist gwt\2.8.1 (
 if not exist %JUNIT_FILE% (
   wget %WGET_ARGS% "%BASEURL%%JUNIT_FILE%"
 )
-
 
 popd
 
@@ -173,11 +160,28 @@ if not exist libclang\%LIBCLANG_VERSION% (
   del %LIBCLANG_FILE%
 )
 
-
 install-packages.cmd
 
 popd
 
-
-
+if not exist C:\Qt%QT_VERSION% (
+  if not exist C:\Qt\Qt%QT_VERSION% (
+    if not exist C:\Qt\%QT_VERSION% (
+      wget %WGET_ARGS% %BASEURL%%QT_FILE%
+      echo Installing Qt, this will take a while...
+      %QT_FILE% --script qt-noninteractive-install-win.qs
+      del %QT_FILE%
+    )
+  )
+)
+if not exist C:\Qt%QT_VERSION% (
+  if not exist C:\Qt\Qt%QT_VERSION% (
+    if not exist C:\Qt\%QT_VERSION% (
+      echo Qt installation failed, please re-run this script to try again.
+      echo Or you can manually install with the Qt online installer and select
+      echo the 64-bit Visual Studio 2017 and QtWebEngine components of
+      echo %QT_VERSION%.
+    )
+  )
+)
 
