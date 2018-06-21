@@ -28,7 +28,7 @@ set LIBCLANG_VERSION=5.0.2
 set LIBCLANG_NAME=libclang-windows-%LIBCLANG_VERSION%
 set LIBCLANG_FILE=%LIBCLANG_NAME%.zip
 
-set QT_VERSION=5.11.0
+set QT_VERSION=5.11.1
 set QT_FILE=QtSDK-%QT_VERSION%-msvc2017.7z
 
 if not exist gnudiff (
