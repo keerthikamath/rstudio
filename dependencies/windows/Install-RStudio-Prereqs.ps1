@@ -92,12 +92,11 @@ Controller.prototype.FinishedPageCallback = function() {
     gui.clickButton(buttons.FinishButton);
 }
 "@
-        $QtScript | Out-File -FilePath C:\qt.qs -Encoding ASCII
-        Write-Host "Starting Qt installation. Be patient, don't click on the buttons!"
-        Start-Process $QtInstaller -Wait -ArgumentList '--script c:\qt.qs'
-        if ($DeleteDownloads) { Remove-Item $QtInstaller -Force }
-        Remove-Item c:\qt.qs -Force
-    }
+    $QtScript | Out-File -FilePath C:\qt.qs -Encoding ASCII
+    Write-Host "Starting Qt installation. Be patient, don't click on the buttons!"
+    Start-Process $QtInstaller -Wait -ArgumentList '--script c:\qt.qs'
+    if ($DeleteDownloads) { Remove-Item $QtInstaller -Force }
+    Remove-Item c:\qt.qs -Force
 }
 
 function Broadcast-SettingChange {
