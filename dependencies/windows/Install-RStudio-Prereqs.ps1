@@ -82,7 +82,8 @@ if (-Not (Test-Path -Path "C:\Program Files (x86)\Microsoft Visual Studio\2017")
     } else {
         Write-Host "Using previously downloaded Visual Studio installer"
     }
-    Start-Process $VSSetup -Wait -ArgumentList '--quiet --add Microsoft.VisualStudio.Workload.VCTools' ;\
+    Write-Host "Installing Visual Studio Build Tools..."
+    Start-Process $VSSetup -Wait -ArgumentList '--quiet --add Microsoft.VisualStudio.Workload.VCTools'
     if ($DeleteDownloads) { Remove-Item $VSSetup -Force }
 } else {
     Write-Host "Visual Studio 2017 build tools already intalled, skipping"
