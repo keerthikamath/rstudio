@@ -160,7 +160,7 @@ if not exist libclang\%LIBCLANG_VERSION% (
   del %LIBCLANG_FILE%
 )
 
-install-packages.cmd
+call install-packages.cmd
 
 popd
 
