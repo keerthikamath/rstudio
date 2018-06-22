@@ -63,6 +63,7 @@ RUN cd /opt/rstudio-tools/dependencies/common && /bin/bash ./install-common
 COPY dependencies/linux/install-qt-sdk /tmp/
 RUN mkdir -p /opt/RStudio-QtSDK && \
     export QT_SDK_DIR=/opt/RStudio-QtSDK/Qt5.11.1 && \
+    export QT_QPA_PLATFORM=minimal && \
     /tmp/install-qt-sdk
 
 # remove any previous users with conflicting IDs

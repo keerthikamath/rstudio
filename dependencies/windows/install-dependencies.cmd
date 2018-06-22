@@ -164,29 +164,5 @@ call install-packages.cmd
 
 popd
 
-if not exist C:\Qt%QT_VERSION% (
-  if not exist C:\Qt\Qt%QT_VERSION% (
-    if not exist C:\Qt\%QT_VERSION% (
-      if exist %appdata%\Qt\qtaccount.ini (
-        del %appdata%\Qt\qtaccount.ini
-      )
-      wget %WGET_ARGS% %BASEURL%%QT_FILE%
-      echo "Installing Qt, this will take a while."
-      echo "Ignore warnings about QtAccount credentials."
-      echo "Do not click on the setup interface, it is controlled by a script."
-      %QT_FILE% --script qt-noninteractive-install-win.qs
-      del %QT_FILE%
-    )
-  )
-)
-if not exist C:\Qt%QT_VERSION% (
-  if not exist C:\Qt\Qt%QT_VERSION% (
-    if not exist C:\Qt\%QT_VERSION% (
-      echo Qt installation failed, please re-run this script to try again.
-      echo Or you can manually install with the Qt online installer and select
-      echo the 64-bit Visual Studio 2017 and QtWebEngine components of
-      echo %QT_VERSION%.
-    )
-  )
-)
+call install-qt-sdk-win.cmd
 

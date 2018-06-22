@@ -4,6 +4,7 @@ function Controller() {
     installer.installationFinished.connect(function() {
         gui.clickButton(buttons.NextButton);
     })
+    installer.setMessageBoxAutomaticAnswer("cancelInstallation", QMessageBox.Yes);
 }
 
 Controller.prototype.WelcomePageCallback = function() {
@@ -11,7 +12,10 @@ Controller.prototype.WelcomePageCallback = function() {
 }
 
 Controller.prototype.CredentialsPageCallback = function() {
-    gui.clickButton(buttons.NextButton);
+    var widget = gui.currentPageWidget();
+    widget.loginWidget.EmailLineEdit.setText("");
+    widget.loginWidget.PasswordLineEdit.setText("");
+    gui.clickButton(buttons.NextButton, 500);
 }
 
 Controller.prototype.IntroductionPageCallback = function() {

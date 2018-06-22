@@ -35,6 +35,7 @@ function Controller() {
     installer.installationFinished.connect(function() {
         gui.clickButton(buttons.NextButton);
     })
+    installer.setMessageBoxAutomaticAnswer("cancelInstallation", QMessageBox.Yes);
 }
 
 Controller.prototype.WelcomePageCallback = function() {
@@ -42,7 +43,10 @@ Controller.prototype.WelcomePageCallback = function() {
 }
 
 Controller.prototype.CredentialsPageCallback = function() {
-    gui.clickButton(buttons.NextButton);
+    var widget = gui.currentPageWidget();
+    widget.loginWidget.EmailLineEdit.setText("");
+    widget.loginWidget.PasswordLineEdit.setText("");
+    gui.clickButton(buttons.NextButton, 500);
 }
 
 Controller.prototype.IntroductionPageCallback = function() {
@@ -105,11 +109,6 @@ fi
 
 if [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ]
 then
-   # If there are Qt account credentials, they break the scripted install. This would happen
-   # if user logged into a Qt account during a previous manual install of Qt. We delete the
-   # file if it exists.
-   rm -f Library/Application\ Support/Qt/qtaccount.ini
-
    # download and install
    curl -L $QT_SDK_URL > /tmp/$QT_SDK_BINARY
    cd /tmp
@@ -117,15 +116,21 @@ then
    write_qt_script   
    
    # online installer sometimes fails, keep trying...
-   while [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ]
+   retryCounter=0
+   while [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ] && [ $retryCounter -le 5 ] 
    do
       echo "Installing Qt, this will take a while."
       echo " - Ignore warnings about QtAccount credentials."
       echo " - Do not click on the setup interface, it is controlled by a script."
       ./$QT_SDK_INSTALLER_BIN --script $QT_SCRIPT
+      ((retryCounter++))
    done
    rm -f /tmp/$QT_SDK_BINARY $QT_SCRIPT
    rm -rf /tmp/$QT_SDK_INSTALLER
+   if [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ]; then
+      echo "Error: Unable to install Qt, run script again or install manually." 
+      exit 1
+   fi
 else
    echo "Qt $QT_VERSION SDK already installed"
 fi
