@@ -4,7 +4,6 @@ function Controller() {
     installer.installationFinished.connect(function() {
         gui.clickButton(buttons.NextButton);
     })
-    gui.setSilent(true)
 }
 
 Controller.prototype.WelcomePageCallback = function() {

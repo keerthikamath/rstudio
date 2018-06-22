@@ -167,8 +167,13 @@ popd
 if not exist C:\Qt%QT_VERSION% (
   if not exist C:\Qt\Qt%QT_VERSION% (
     if not exist C:\Qt\%QT_VERSION% (
+      if exist %appdata%\Qt\qtaccount.ini (
+        del %appdata%\Qt\qtaccount.ini
+      )
       wget %WGET_ARGS% %BASEURL%%QT_FILE%
-      echo Installing Qt, this will take a while...
+      echo "Installing Qt, this will take a while."
+      echo "Ignore warnings about QtAccount credentials."
+      echo "Do not click on the setup interface, it is controlled by a script."
       %QT_FILE% --script qt-noninteractive-install-win.qs
       del %QT_FILE%
     )
