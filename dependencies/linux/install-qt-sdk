@@ -20,17 +20,11 @@
 # manually removing components not needed by RStudio.
 
 # define QT archive to download
-SYSTEM_ARCH=`getconf LONG_BIT`
-if [ "$SYSTEM_ARCH" == "64" ]
-then
-  QT_ARCH=x86_64
-else
-  QT_ARCH=x86
-fi
-
+QT_ARCH=x86_64
 QT_VERSION=5.11.1
-QT_SDK_BINARY=QtSDK-${QT_VERSION}-${QT_ARCH}.tar.gz
+QT_SDK_BINARY=qt-unified-linux-x64-3.0.4-online.run
 QT_SDK_URL=https://s3.amazonaws.com/rstudio-buildtools/$QT_SDK_BINARY
+QT_SCRIPT=qt-noninteractive-install-linux.qs
 
 # set Qt SDK dir if not already defined
 if [ -z "$QT_SDK_DIR" ]; then
@@ -42,10 +36,18 @@ fi
 if [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ]
 then
    # download and install
+   cp ./$QT_SCRIPT /tmp
    wget $QT_SDK_URL -O /tmp/$QT_SDK_BINARY
-   cd `dirname $QT_SDK_DIR`
-   tar xzf /tmp/$QT_SDK_BINARY
-   rm /tmp/$QT_SDK_BINARY
+   chmod u+x /tmp/$QT_SDK_BINARY
+   cd /tmp
+
+   # online installer sometimes fails, keep trying...
+   while [ ! -e "$QT_SDK_DIR" ] && [ ! -e "$QT_SDK_DIR2" ] && [ ! -e "$QT_SDK_DIR3" ]
+   do
+      echo "Installing Qt, this will take a while..."
+      ./$QT_SDK_BINARY --script /tmp/$QT_SCRIPT
+   done
+   rm -f /tmp/$QT_SDK_BINARY /tmp/$QT_SCRIPT
 else
    echo "Qt $QT_VERSION SDK already installed"
 fi
