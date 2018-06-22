@@ -46,7 +46,7 @@ set /p GIT_COMMIT= < %TEMPFILE%
 del %TEMPFILE%
 set BUILD_ID=local
 
-REM infer make parallism
+REM infer make parallelism
 set "MAKEFLAGS=-j%NUMBER_OF_PROCESSORS%
 
 REM remove previous image if it exists
@@ -57,3 +57,10 @@ docker rm %CONTAINER_ID%
 REM run compile step
 for %%A in ("%cd%") do set HOSTPATH=%%~sA
 docker run -it --name %CONTAINER_ID% -v %HOSTPATH%:c:/src %REPO%:%IMAGE%
+
+REM extract logs to get filename (should be on the last line)
+REM TODO
+
+REM stop the container
+docker stop %CONTAINER_ID%
+echo Container image saved in %CONTAINER_ID%.
