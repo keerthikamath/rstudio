@@ -44,6 +44,11 @@ mkdir -p "$PKG_DIR"
 cd "$(dirname ${BASH_SOURCE[0]})/.."
 REPO=$(basename $(pwd))
 
+if [ "${IMAGE:0:7}" = "windows" ]; then
+    echo -e "Use win-docker-compile.cmd in a Windows Command Prompt to build for Windows."
+    exit 1
+fi
+
 # print usage if no argument supplied
 if [ -z "$IMAGE" ] || [ -z "$FLAVOR" ]; then
     echo -e "Compiles RStudio inside a Docker container."
@@ -79,9 +84,6 @@ if [ "${IMAGE:0:6}" = "centos" ]; then
 elif [ "${IMAGE:0:8}" = "opensuse" ]; then
     PACKAGE=RPM
     INSTALLER=zypper
-elif [ "${IMAGE:0:7}" = "windows" ]; then
-    echo -e "Use docker-compile.cmd in a Windows Command Prompt to build for Windows."
-    exit 1
 else
     PACKAGE=DEB
     INSTALLER=debian
