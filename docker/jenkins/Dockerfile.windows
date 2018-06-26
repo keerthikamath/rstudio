@@ -71,4 +71,5 @@ RUN Remove-Item -Force 'C:\ProgramData\chocolatey\bin\cpack.exe'
 
 RUN choco install -y git cygwin
 ENV JENKINS_SWARM_VERSION 3.3
-RUN Invoke-WebRequest $('https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/{0}/swarm-client-{0}.jar' -f $env:JENKINS_SWARM_VERSION) -OutFile 'C:\swarm-client.jar' -UseBasicParsing ;
+RUN [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 ; `
+  Invoke-WebRequest $('https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/swarm-client/{0}/swarm-client-{0}.jar' -f $env:JENKINS_SWARM_VERSION) -OutFile 'C:\swarm-client.jar' -UseBasicParsing ;
