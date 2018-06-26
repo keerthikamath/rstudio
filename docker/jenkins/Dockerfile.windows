@@ -8,6 +8,19 @@ FROM microsoft/dotnet-framework:4.7.1
 # set RUN commands to use powershell
 SHELL ["powershell"]
 
+# Download the Visual Studio Build Tools bootstrapper
+ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
+
+# Install Build Tools excluding workloads and components with known issues
+# Return value of 3010 indicates "restart needed"
+RUN Start-Process C:\TEMP\vs_buildtools.exe -Wait -ArgumentList '--quiet --wait --norestart --nocache `
+    --add Microsoft.VisualStudio.Workload.VCTools `
+    --remove Microsoft.VisualStudio.Component.Windows10SDK.10240 `
+    --remove Microsoft.VisualStudio.Component.Windows10SDK.10586 `
+    --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 `
+    --remove Microsoft.VisualStudio.Component.Windows81SDK' ;` 
+  if ( 3010 -eq $LastErrorCode ) { exit 0 } else { exit $LastErrorCode }
+ 
 # install chocolatey
 RUN iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 
@@ -40,19 +53,6 @@ RUN Invoke-WebRequest https://s3.amazonaws.com/rstudio-buildtools/test-qt-window
   Start-Process c:\nsis-2.50-setup.exe -Wait -ArgumentList '/S' ;`
   Remove-Item c:\nsis-2.50-setup.exe
 
-# Download the Visual Studio Build Tools bootstrapper
-ADD https://aka.ms/vs/15/release/vs_buildtools.exe C:\TEMP\vs_buildtools.exe
-
-# Install Build Tools excluding workloads and components with known issues
-# Return value of 3010 indicates "restart needed"
-RUN Start-Process C:\TEMP\vs_buildtools.exe -Wait -ArgumentList '--quiet --wait --norestart --nocache `
-    --all `
-    --remove Microsoft.VisualStudio.Component.Windows10SDK.10240 `
-    --remove Microsoft.VisualStudio.Component.Windows10SDK.10586 `
-    --remove Microsoft.VisualStudio.Component.Windows10SDK.14393 `
-    --remove Microsoft.VisualStudio.Component.Windows81SDK' ;` 
-  if ( 3010 -eq $LastErrorCode ) { exit 0 } else { exit $LastErrorCode }
- 
 # install qt (note that we are using the current directory's context)
 COPY docker\jenkins\windows\qt-noninteractive-install-win.qs c:\qt-noninteractive-install-win.qs
 RUN $ErrorActionPreference = 'Stop'; ``
