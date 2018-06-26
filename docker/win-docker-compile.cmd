@@ -38,7 +38,7 @@ if defined DOCKER_GITHUB_LOGIN (
 )
 
 REM rebuild the image if necessary
-docker build --tag %REPO%:%IMAGE% --file docker\jenkins\Dockerfile.%IMAGE% %BUILD_ARGS% .
+docker build --tag %REPO%:%IMAGE% --file docker\jenkins\Dockerfile.%IMAGE% %BUILD_ARGS% -m 2GB .
 
 REM set up build flags
 git rev-parse HEAD > %TEMPFILE%
