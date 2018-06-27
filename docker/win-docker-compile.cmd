@@ -1,7 +1,7 @@
 @echo off
 setlocal enableextensions enabledelayedexpansion
 
-REM no arguments: script always builds Windows / Desktop / 99.9.99
+REM no arguments: script always builds Windows / Desktop / Release / 99.9.99
 set IMAGE=windows
 set FLAVOR=desktop
 set VERSION=

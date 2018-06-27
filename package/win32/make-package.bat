@@ -52,6 +52,7 @@ cmake -G"Visual Studio 15 2017 Win64" ^
       -DRSTUDIO_TARGET=Desktop ^
       -DCMAKE_BUILD_TYPE=%CMAKE_BUILD_TYPE% ^
       -DRSTUDIO_PACKAGE_BUILD=1 ^
+      -DCMAKE_C_COMPILER_WORKS=%CMAKE_C_COMPILER_WORKS% ^
       ..\..\.. || goto :error
 cmake --build . --config %CMAKE_BUILD_TYPE% || goto :error
 cd ..
