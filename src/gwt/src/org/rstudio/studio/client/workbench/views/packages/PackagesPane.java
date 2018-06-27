@@ -498,10 +498,18 @@ public class PackagesPane extends WorkbenchPane implements Packages.Display
       // the browser draw its own)
       try
       {
+         // Dig out the div element acting as a container both for the actual
+         // DataGrid table, as well as the custom scrollbar.
          Element el = Element.as(tableEl.getChild(2).getChild(0));
          NodeList<Node> children = el.getChildNodes();
+         
+         // Ensure that the element containing the actual table is positioned
+         // statically, and use automatic overflow to allow the browser to draw
+         // scrollbars.
          Element.as(children.getItem(1)).getStyle().clearPosition();
          Element.as(children.getItem(1).getChild(0)).getStyle().setOverflow(Overflow.AUTO);
+         
+         // Remove the div containing the custom GWT scroller.
          el.removeChild(children.getItem(children.getLength() - 1));
       }
       catch (Exception e)
