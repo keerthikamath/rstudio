@@ -50,9 +50,15 @@ import org.rstudio.studio.client.workbench.views.packages.ui.PackagesDataGridRes
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.builder.shared.TableCellBuilder;
 import com.google.gwt.dom.builder.shared.TableRowBuilder;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
+import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.dom.client.Style.Overflow;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -344,6 +350,15 @@ public class PackagesPane extends WorkbenchPane implements Packages.Display
    
    private void initPackagesTable()
    {
+      Scheduler.get().scheduleDeferred(new ScheduledCommand()
+      {
+         @Override
+         public void execute()
+         {
+            onPackagesTableReady();
+         }
+      });
+      
       packagesTable_.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
       packagesTable_.setSelectionModel(new NoSelectionModel<PackageInfo>());
         
@@ -472,6 +487,27 @@ public class PackagesPane extends WorkbenchPane implements Packages.Display
       layoutPackagesTable();
       
       packagesDataProvider_.addDataDisplay(packagesTable_);
+   }
+   
+   private void onPackagesTableReady()
+   {
+      Element tableEl = packagesTable_.getElement();
+      
+      // Perform DOM surgery -- carefully remove the unnecessary
+      // position attribute, and remove the DataGrid scroller (let
+      // the browser draw its own)
+      try
+      {
+         Element el = Element.as(tableEl.getChild(2).getChild(0));
+         NodeList<Node> children = el.getChildNodes();
+         Element.as(children.getItem(1)).getStyle().clearPosition();
+         Element.as(children.getItem(1).getChild(0)).getStyle().setOverflow(Overflow.AUTO);
+         el.removeChild(children.getItem(children.getLength() - 1));
+      }
+      catch (Exception e)
+      {
+         Debug.logException(e);;
+      }
    }
 
    private void layoutPackagesTable()
