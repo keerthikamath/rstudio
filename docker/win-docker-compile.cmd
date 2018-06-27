@@ -47,7 +47,9 @@ del %TEMPFILE%
 set BUILD_ID=local
 
 REM infer make parallelism
-set "MAKEFLAGS=-j%NUMBER_OF_PROCESSORS%
+REM this is the number of processors on the host, not necessarily same
+REM in the Windows container
+REM set "MAKEFLAGS=-j%NUMBER_OF_PROCESSORS%
 
 REM remove previous image if it exists
 set CONTAINER_ID=build-%REPO%-%IMAGE%
